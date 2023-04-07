@@ -1,8 +1,7 @@
 import styled from "styled-components";
-
 import { useEffect, useState } from "react";
 
-export default function Products({ navigate}) {
+export default function Products({ navigate }) {
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
 
@@ -12,9 +11,9 @@ export default function Products({ navigate}) {
 
   function getProducts() {
     fetch("https://products-crud333.000webhostapp.com/")
-      .then(response => response.json())
-      .then(data => setProducts(data))
-      .catch(error => console.log(error));
+      .then((response) => response.json())
+      .then((data) => setProducts(data))
+      .catch((error) => console.log(error));
   }
 
   const handleClick = () => {
@@ -24,28 +23,29 @@ export default function Products({ navigate}) {
   const handleCheck = (id) => {
     if (selectedProducts.includes(id)) {
       setSelectedProducts((prev) => prev.filter((pid) => pid !== id));
-      console.log(selectedProducts)
+      console.log(selectedProducts);
     } else {
       setSelectedProducts((prev) => [...prev, id]);
-      console.log(selectedProducts)
+      console.log(selectedProducts);
     }
   };
 
   const deleteProduct = () => {
     selectedProducts.forEach((id) => {
-      fetch(`https://products-crud333.000webhostapp.com/index.php/${id}/delete`, {
-        method: 'POST',
-        body: JSON.stringify({
-          type:"delete",
-          
-        })
-      }).then(() => {
+      fetch(
+        `https://products-crud333.000webhostapp.com/index.php/${id}/delete`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            type: "delete",
+          }),
+        }
+      ).then(() => {
         getProducts();
       });
     });
   };
 
-  
   return (
     <Main>
       <Header>

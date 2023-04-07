@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 function App() {
+  const [products, setProducts] = useState([]);
   const [selectType, setSelectType] = useState("1");
   const [size, setSize] = useState(null);
   const [weight, setWeight] = useState(null);
@@ -24,6 +25,8 @@ function App() {
           path="/addproduct"
           element={
             <AddProduct
+              products={products}
+              setProducts={setProducts}
               navigate={navigate}
               size={size}
               setSize={setSize}

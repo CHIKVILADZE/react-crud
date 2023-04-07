@@ -63,32 +63,43 @@ switch($method)
         
         } else {
             
-            
             $product = json_decode( file_get_contents('php://input') );
-            $sql = "INSERT INTO products(id, type_id, sku, name, size, weight, height, width, length, price, description) 
-            VALUES (:id, :type_id, :sku, :name,  :size, :weight, :height, :width, :length, :price, :description)";
+            
         
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':id', $product->id);
-            $stmt->bindParam(':type_id', $product->type_id);
-            $stmt->bindParam(':sku', $product->sku);
-            $stmt->bindParam(':name', $product->name);
-            $stmt->bindParam(':size', $product->size);  
-            $stmt->bindParam(':weight', $product->weight);
-            $stmt->bindParam(':height', $product->height);
-            $stmt->bindParam(':width', $product->width);
-            $stmt->bindParam(':length', $product->length);      
-            $stmt->bindParam(':price', $product->price);
-            $stmt->bindParam(':description', $product->description);
+            $check_query = $conn->prepare('SELECT COUNT(*) FROM products WHERE sku = :sku');
+            $check_query->execute(['sku' => $product->sku]);
+            $count = $check_query->fetchColumn();
+            
+            if ($count > 0) {
+                $response = ['status' => 2, 'message' => 'This sku value already exists.'];
+            } 
+            else {
+                $sql = "INSERT INTO products(id, type_id, sku, name, size, weight, height, width, length, price, description) 
+                VALUES (:id, :type_id, :sku, :name,  :size, :weight, :height, :width, :length, :price, :description)";
+            
+                $stmt = $conn->prepare($sql);
+                $stmt->bindParam(':id', $product->id);
+                $stmt->bindParam(':type_id', $product->type_id);
+                $stmt->bindParam(':sku', $product->sku);
+                $stmt->bindParam(':name', $product->name);
+                $stmt->bindParam(':size', $product->size);  
+                $stmt->bindParam(':weight', $product->weight);
+                $stmt->bindParam(':height', $product->height);
+                $stmt->bindParam(':width', $product->width);
+                $stmt->bindParam(':length', $product->length);      
+                $stmt->bindParam(':price', $product->price);
+                $stmt->bindParam(':description', $product->description);
  
-            if($stmt->execute()) {
-                $response = ['status' => 1, 'message' => 'Record created successfully.'];
-            } else {
-                $response = ['status' => 0, 'message' => 'Failed to create record.'];
-    
-            }
+                if($stmt->execute()) {
+                    $response = ['status' => 1, 'message' => 'Record created successfully.'];
+                    
+                } else {
+                    $response = ['status' => 0, 'message' => 'Failed to create record.'];
         
-        echo json_encode($response);
+                }
+            }
+            
+            echo json_encode($response);
         }
         
         
@@ -101,3 +112,5 @@ switch($method)
     
 
 };
+
+  

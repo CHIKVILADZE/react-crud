@@ -4,9 +4,11 @@ import BookSize from "../components/BookSize";
 import DvdSize from "../components/DvdSize";
 import FurnitureSize from "../components/FurnitureSize";
 import { useState } from "react";
-
+import { useForm } from "react-hook-form";
 
 export default function AddProduct({
+  products,
+  setProducts,
   navigate,
   size,
   setSize,
@@ -24,6 +26,12 @@ export default function AddProduct({
   setDescription,
 }) {
   const [inputs, setInputs] = useState([]);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const [error, setError] = useState(false);
 
   const handleChangeInput = (event) => {
     const name = event.target.name;
@@ -35,37 +43,36 @@ export default function AddProduct({
     setSelectType(event.target.value);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-
-    fetch('https://products-crud333.000webhostapp.com/index.php/save', {
-      method: 'POST',
+  const onSubmit = async () => {
+    fetch("https://products-crud333.000webhostapp.com/index.php/save", {
+      method: "POST",
       body: JSON.stringify({
         ...inputs,
-            type_id: selectType,
-           size,
-           weight,
-           height,
-           width,
-           length,
-           description,
-      })
-  
+        type_id: selectType,
+        size,
+        weight,
+        height,
+        width,
+        length,
+        description,
+      }),
     })
-       .then((response) => response.json())
-       .then((data) => {
-          console.log(data);
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("status", data);
+        if (data.status === 2) {
+          setError(true);
+        } else {
           navigate("/");
-          // Handle data
-       })
-       .catch((err) => {
-          console.log(err.message);
-       });
-      };
-      
+        }
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+
   return (
-    <Main onSubmit={handleSubmit}>
+    <Main onSubmit={handleSubmit(onSubmit)}>
       <Header>
         <h2>Product Add</h2>
         <BtnBox>
@@ -80,28 +87,39 @@ export default function AddProduct({
             <label>Sku</label>
             <input
               type="text"
-              name="sku"
               id="sku"
+              {...register("sku", {
+                required: { value: true, message: "Please enter valid sku" },
+              })}
               onChange={handleChangeInput}
             />
+            {errors.sku && <Span>{errors.sku.message}</Span>}
+
+            {error === true && <Span>This sku value already exists</Span>}
           </InputBox>
           <InputBox>
             <label>Name</label>
             <input
               type="text"
-              name="name"
               id="name"
+              {...register("name", {
+                required: { value: true, message: "Please enter valid name" },
+              })}
               onChange={handleChangeInput}
             />
+            {errors.name && <Span>{errors.name.message}</Span>}
           </InputBox>
           <InputBox>
             <label>Price ($)</label>
             <input
               type="text"
-              name="price"
               id="price"
+              {...register("price", {
+                required: { value: true, message: "Please enter valid price" },
+              })}
               onChange={handleChangeInput}
             />
+            {errors.price && <Span>{errors.price.message}</Span>}
           </InputBox>
 
           <SelectBox>
@@ -197,11 +215,19 @@ const Form = styled.div`
 
 const InputBox = styled.div`
   width: 250px;
-
+  position: relative;
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 `;
+const Span = styled.span`
+  font-size: 12px;
+  color: red;
+  position: absolute;
+  top: 20px;
+  left: 75px;
+`;
+
 const SelectBox = styled.div`
   width: 220px;
   display: flex;
